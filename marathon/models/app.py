@@ -17,10 +17,11 @@ class MarathonApp(MarathonResource):
     :param int instances: instances
     :param float mem: memory (in MB) required per instance
     :param list[int] ports: ports
+    :param int task_rate_limit: max number of tasks launched per second
     :param list[str] uris: uris
     """
 
-    UPDATE_OK_ATTRIBUTES = ['cmd', 'constraints', 'container', 'cpus', 'env', 'executor', 'mem', 'ports', 'uris']
+    UPDATE_OK_ATTRIBUTES = ['cmd', 'constraints', 'container', 'cpus', 'env', 'executor', 'mem', 'ports', 'taskRateLimit', 'uris']
     """List of attributes which may be updated/changed after app creation"""
 
     CREATE_ONLY_ATTRIBUTES = ['id']
@@ -30,7 +31,8 @@ class MarathonApp(MarathonResource):
     """List of read-only attributes"""
 
     def __init__(self, cmd=None, constraints=None, container=None, cpus=None, env=None, executor=None,
-                 health_checks=None, id=None, instances=None, mem=None, ports=None, tasks=None, uris=None):
+                 health_checks=None, id=None, instances=None, mem=None, ports=None, tasks=None,
+                 task_rate_limit=None, uris=None):
         self.cmd = cmd
         self.constraints = [
             c if isinstance(c, MarathonConstraint) else MarathonConstraint(*c)
@@ -45,6 +47,7 @@ class MarathonApp(MarathonResource):
         self.mem = mem
         self.ports = ports or []
         self.tasks = tasks or []
+        self.task_rate_limit = task_rate_limit
         self.uris = uris
 
     @classmethod
@@ -68,6 +71,7 @@ class MarathonApp(MarathonResource):
             mem=obj.get('mem'),
             ports=obj.get('ports'),
             tasks=[MarathonTask.json_decode(t) for t in obj.get('tasks', [])],
+            task_rate_limit=obj.get('taskRateLimit'),
             uris=obj.get('uris')
         )
 
@@ -89,5 +93,6 @@ class MarathonApp(MarathonResource):
             'mem': self.mem,
             'ports': self.ports,
             'tasks': [t.json_encode() for t in self.tasks],
+            'taskRateLimit': self.task_rate_limit,
             'uris': self.uris
         }
